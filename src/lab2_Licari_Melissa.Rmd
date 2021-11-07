@@ -1,0 +1,110 @@
+---
+title: "lab2_Licari_Melissa"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+#install.packages("dplyr")
+#install.packages("magrittr")
+#install.packages("car")
+
+library(ggplot2)
+library(car)
+```
+
+```{r}
+# 1a
+
+load("lab2_GSS.RData")
+head(lab2_GSS)
+print(lab2_GSS$age)
+```
+
+```{r}
+# 1b
+
+lab2_GSS$age[lab2_GSS$age==98] = NA
+lab2_GSS$age[lab2_GSS$age==99] = NA
+mean(lab2_GSS$age, na.rm = TRUE)
+
+```
+
+```{r}
+#2-1ii
+df = lab2_GSS[!is.na(lab2_GSS$age), ]
+
+qqnorm(df$age)
+```
+
+```{r}
+# 2-1iii
+ggplot(df, aes(age)) + geom_histogram(binwidth=2, color="white", fill="purple") + labs(x="Age")
+```
+
+```{r}
+#2-2ii
+shapiro.test(df$age)
+```
+
+```{r}
+lab2_GSS$income16[lab2_GSS$income16==27] <- NA
+lab2_GSS$income16[lab2_GSS$income16==98] <- NA
+lab2_GSS$income16[lab2_GSS$income16==0] <- NA
+df2 <- lab2_GSS[!is.na(lab2_GSS$income16), ]
+
+# 2-3
+var(df2[df2$income16>=22, "age"], na.rm = TRUE)
+```
+
+```{r}
+# 2-4
+var(df2[df2$income16<22, "age"], na.rm = TRUE)
+```
+
+```{r}
+# 2-5
+lab2_GSS$new_income <- ifelse(lab2_GSS$income16>=22, "Equal to or Above $90k", "Below $90k")
+leveneTest(lab2_GSS$age, factor(lab2_GSS$new_income))
+```
+
+```{r}
+# 3
+df3 <- na.omit(lab2_GSS)
+ggplot(df3, aes(x = age, fill = factor(new_income))) + geom_density(alpha = 0.2) + ggtitle("Density of Age Grouped by 2015 Income Level") + labs(y= "Density", x = "Age") + scale_fill_discrete(name = "2015 Income") + theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)))
+
+```
+```{r}
+# 4
+lab2_GSS$owngun[lab2_GSS$owngun==3] <- NA
+lab2_GSS$owngun[lab2_GSS$owngun==8] <- NA
+lab2_GSS$owngun[lab2_GSS$owngun==9] <- NA
+lab2_GSS$owngun[lab2_GSS$owngun==0] <- NA
+lab2_GSS$owngun[lab2_GSS$owngun==2] <- 0
+
+lab2_GSS$polint[lab2_GSS$polint==8] <- NA
+lab2_GSS$polint[lab2_GSS$polint==9] <- NA
+lab2_GSS$polint[lab2_GSS$polint==0] <- NA
+
+
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+library(grid)
+ 
+# create a dataset
+df3 <- na.omit(lab2_GSS)
+
+ggplot(tally(group_by(df3, polint, owngun)),
+    aes(x = polint, y = (n/sum(n)*100), fill = factor(owngun))) +
+    geom_bar(position = "dodge", stat="identity") + coord_flip() + scale_x_continuous(breaks = 1:5, labels = c("Very","Fairly","Somewhat","Not Very","Not At All")) + ggtitle("Interest in Politics by Gun Ownership") + labs(y= "Percentage", x = "Interest in Politics (Self-Reported)") + scale_fill_discrete(name = "Does Pariticpant Own a Gun?", labels = c("No", "Yes")) + theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)), panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
